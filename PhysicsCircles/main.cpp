@@ -2,6 +2,8 @@
 #include "olcPixelGameEngine.h"
 #include <iostream>
 #include <cmath>
+#include <sstream>
+#include <string>
 
 struct Circle {
 
@@ -16,7 +18,7 @@ struct Circle {
 class PhysicsEngine : public olc::PixelGameEngine
 {
 private:
-	float G = 180.8;
+	float G = 10.0f;
 	Circle circles[2];
 	void displayCircles(Circle circArray[], int centerCircle = -1) {
 
@@ -63,6 +65,7 @@ private:
 					float deltaX = circArray[i].pos.x - circArray[j].pos.x;
 					float deltaY = circArray[i].pos.y - circArray[j].pos.y;
 					a /= (float)std::pow(deltaX, 2) + (float)std::pow(deltaY, 2);
+					//a /= circArray[i].m;
 					float angleTo = std::atanf(deltaY / deltaX);
 					float aX = std::cosf(angleTo) * a;
 					float aY = std::sinf(angleTo) * a;
@@ -73,8 +76,8 @@ private:
 						aY *= -1.0f;
 					}
 
-					circArray[i].a.x = aX;
-					circArray[i].a.y = aY;
+					circArray[i].a.x += aX;
+					circArray[i].a.y += aY;
 				}
 			}
 
@@ -91,18 +94,30 @@ public:
 public:
 	bool OnUserCreate() override
 	{
+
+		//sqrt(G * M / r) = v
+		//G*M / v^2 = r
 		// Called once at the start, so create things here'
 		circles[0].r = 10;
-		circles[0].pos = { ((float)ScreenWidth() / (float)2) - (float)70.0, ((float)ScreenHeight() / (float)2) - (float)0.0 };
-		circles[0].m = 5500;
-		circles[0].v = { 0.0f, -90.0f };
+		circles[0].pos = { ((float)ScreenWidth() / (float)2) - (float)200.0f, ((float)ScreenHeight() / (float)2) - (float)0.0 };
+		circles[0].m = 100000.0f;
+		circles[0].v = { 0.0f, -100.0f };
 		circles[0].a = { 0.0f, 0.0f };
 
-		circles[1].r = 10;
+		circles[1].r = 60;
 		circles[1].pos = { (float)ScreenWidth() / (float)2 , (float)ScreenHeight() / (float)2 };
-		circles[1].m = 15500;
-		circles[1].v = { 0.0f, 90.0f };
+		circles[1].m = 200000.0f;
+		circles[1].v = { 0.0f, 0.0f };
 		circles[1].a = { 0.0f, 0.0f };
+
+		
+		//circles[2].r = 1;
+		//circles[2].pos = { ((float)ScreenWidth() / (float)2) - (float)220.0f, ((float)ScreenHeight() / (float)2) - (float)0.0 };
+		//circles[2].m = 1.0f;
+		//circles[2].v = { 0.0f, -110.47f };
+		//circles[2].a = { 0.0f, 0.0f };
+		
+		
 		return true;
 	}
 
@@ -114,6 +129,25 @@ public:
 		Clear(olc::BLACK);
 		//loop through all of the circles and display them
 		displayCircles(circles, 1);
+		//display Data
+		//FillRect( 0, 0, 200, 100, olc::GREY);
+		for (int i = 0; i < sizeof(circles) / sizeof(Circle); i++) {
+
+			std::ostringstream out;
+			out << "v_x" << i << ": ";
+			out << int(circles[i].v.x * 100) / 100.0f << std::endl;
+
+			out << "v_y" << i << ": ";
+			out << int(circles[i].v.y * 100) / 100.0f << std::endl;
+
+			out << "a_x" << i << ": ";
+			out << int(circles[i].a.x * 100) / 100.0f << std::endl;
+
+			out << "a_y" << i << ": ";
+			out << int(circles[i].a.y * 100) / 100.0f;
+			
+			DrawString({ 10, 70 * i }, out.str(), olc::WHITE, 2);
+		}
 		return true;
 	}
 };
